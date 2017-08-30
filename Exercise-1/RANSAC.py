@@ -60,16 +60,32 @@ seg.set_distance_threshold(max_distance)
 # Call the segment function to obtain set of inlier indices and model coefficients
 inliers, coefficients = seg.segment()
 
-
+'''
+Extract inliers: Chap4-3-15
+'''
 # Extract inliers
+extracted_inliers = cloud_filtered.extract(inliers, negative=False)
+filename = 'extracted_inliers.pcd'
+pcl.save(extracted_inliers, filename)
 
-# Save pcd for table
-# pcl.save(cloud, filename)
+extracted_outliers = cloud_filtered.extract(inliers, negative=True)
+filename = 'extracted_outliers.pcd'
+pcl.save(extracted_outliers, filename)
 
+'''
+Extract outliers: Chap4-3-16
+'''
+# Much like the previous filters, we start by creating a filter object: 
+outlier_filter = cloud_filtered.make_statistical_outlier_filter()
 
-# Extract outliers
+# Set the number of neighboring points to analyze for any given point
+outlier_filter.set_mean_k(50)
 
+# Set threshold scale factor
+x = 1.0
 
-# Save pcd for tabletop objects
+# Any point with a mean distance larger than global (mean distance+x*std_dev) will be considered outlier
+outlier_filter.set_std_dev_mul_thresh(x)
 
-
+# Finally call the filter function for magic
+cloud_filtered = outlier_filter.filter()
